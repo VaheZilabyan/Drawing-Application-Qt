@@ -1,0 +1,7 @@
+create_line -name {line1} -coord_1 {0,-70} -coord_2 {100,-70}
+create_triangle -name {triangle1} -coord_1 {0,0} -coord_2 {100,100} -coord_3 {-100,100}
+create_rectangle -name {rectangle1} -coord_1 {150,50} -coord_2 {250,200}
+create_rectangle -name {rectangle2} -coord_1 {150,-50} -coord_2 {250,-50} -coord_3 {250,0} -coord_4 {150,0}
+create_square -name {square1} -coord_1 {0,-50} -coord_2 {50,-50} -coord_3 {50,0} -coord_4 {0,0}
+create_square -name {square2} -coord_1 {-200,-200} -coord_2 {-100,-100}
+connect -object_name_1 {triangle1} -object_name_2 {rectangle1}
