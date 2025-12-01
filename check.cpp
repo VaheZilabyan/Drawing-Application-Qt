@@ -2,6 +2,27 @@
 
 Check::Check() {}
 
+QPair<bool, QString> Check::check(const Type &type, const QList<QPointF> &coords)
+{
+    switch (type) {
+    case Type::Line:
+        return qMakePair(true, "");
+        break;
+    case Type::Rectangle:
+        return qMakePair(isRectangle(coords), "Rectangle");
+        break;
+    case Type::Square:
+        return qMakePair(isSquare(coords), "Square");
+        break;
+    case Type::Triangle:
+        return qMakePair(isTriangle(coords), "Triangle");
+        break;
+    default:
+        break;
+    }
+    return qMakePair(false, "");
+}
+
 bool Check::isSquare(const QList<QPointF>& coords) {
     return isQuadrilateral(coords, true);
 }

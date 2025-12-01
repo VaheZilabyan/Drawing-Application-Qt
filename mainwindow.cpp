@@ -156,31 +156,7 @@ void MainWindow::processCommand()
     } else if (input.startsWith("execute_file")) {
 
         auto result = parser.parseCommandsFromFile(input);
-        if (result.errors.isEmpty()) {
-            qDebug() << "[0 errors]...";
-            for (auto line : result.lines) {
-                log(line);
-            }
-        } else {
-            int i = 0;
-            for (auto error : result.errors) {
-                qDebug() << i++ << ": " << error;
-            }
-            return;
-        }
-        //create and connect objects
-        for (auto parseResult : result.lineResult) {
-            QString name = parseResult.object.name;
-            Type type = parseResult.object.type;
-            auto coords = parseResult.object.coords;
-
-            if (type == Type::Connection) {
-                controller->connectObjects(parseResult.object.obj1, parseResult.object.obj2);
-                continue;
-            }
-
-            controller->createShape(name, type, coords);
-        }
+        executeFile(result);
 
     } else {
         log("[ERROR] Unknown command");
@@ -213,35 +189,53 @@ void MainWindow::openFileClicked()
 
     Parser parser;
     auto result = parser.executeFromFile(path);
-    if (result.errors.isEmpty()) {
-        qDebug() << "[0 errors]...";
-        for (auto line : result.lines) {
-            log(line);
-        }
-    } else {
-        for (auto error : result.errors) {
-            qDebug() << error;
-            log(error);
-        }
-        return;
-    }
-    //create and connect objects
-    for (auto parseResult : result.lineResult) {
-        QString name = parseResult.object.name;
-        Type type = parseResult.object.type;
-        auto coords = parseResult.object.coords;
-
-        if (type == Type::Connection) {
-            controller->connectObjects(parseResult.object.obj1, parseResult.object.obj2);
-            continue;
-        }
-
-        controller->createShape(name, type, coords);
-    }
+    executeFile(result);
 
 }
 
 void MainWindow::log(const QString& text)
 {
     logWindow->appendPlainText(text);
+}
+
+void MainWindow::executeFile(FileParseResult result)
+{
+    Parser parser;
+    Check check;
+    if (result.errors.isEmpty()) {
+        qDebug() << "[0 errors]...";
+        for (auto& line : result.lines) {
+            log(line);
+        }
+    } else {
+        int i = 0;
+        for (auto& error : result.errors) {;
+            qDebug() << i++ << ":" << error;
+            log(error);
+        }
+        return;
+    }
+    //create and connect objects
+    for (auto& parseResult : result.lineResult) {
+        QString name = parseResult.object.name;
+        Type type = parseResult.object.type;
+        auto coords = parseResult.object.coords;
+
+        if (type == Type::Connection) {
+            QString name1 = parseResult.object.obj1;
+            QString name2 = parseResult.object.obj2;
+            if (controller->hasObjectNamed(name1) && controller->hasObjectNamed(name2)) {
+                controller->connectObjects(name1, name2);
+            } else {
+                log("[ERROR] Connection: Wrong names.");
+            }
+            continue;
+        }
+        auto [isShape, shapeType] = check.check(type, coords);
+        if (isShape) {
+            controller->createShape(name, type, coords);
+        } else {
+            log("[ERROR] " + shapeType + ": Wrong coordinates.");
+        }
+    }
 }

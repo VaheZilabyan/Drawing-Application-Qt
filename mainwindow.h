@@ -25,6 +25,7 @@ public slots:
 
 private:
     void log(const QString& text);
+    void executeFile(FileParseResult result);
 
 private:
     CanvasController *controller;
